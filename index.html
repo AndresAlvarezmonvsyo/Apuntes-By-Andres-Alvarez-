@@ -1,1 +1,2328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apuntes Digitales Avanzados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --danger-color: #f72585;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --sidebar-bg: #2b2d42;
+            --sidebar-text: #f8f9fa;
+            --editor-bg: #f8f9fa;
+            --transition: all 0.3s ease;
+        }
 
+        [data-theme="dark"] {
+            --primary-color: #4895ef;
+            --secondary-color: #4361ee;
+            --accent-color: #3f37c9;
+            --light-color: #212529;
+            --dark-color: #f8f9fa;
+            --gray-color: #adb5bd;
+            --border-color: #495057;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --card-bg: #2b2d42;
+            --sidebar-bg: #1a1a2e;
+            --sidebar-text: #e2e2e2;
+            --editor-bg: #16213e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            height: 100vh;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header Styles */
+        .app-header {
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            z-index: 10;
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .logo img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .logo h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            overflow: hidden;
+            border: 2px solid var(--primary-color);
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 0.5rem 0;
+            min-width: 200px;
+            z-index: 100;
+            display: none;
+            border: 1px solid var(--border-color);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 0.3rem 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 5;
+        }
+
+        .sidebar-collapsed {
+            width: 80px;
+        }
+
+        .sidebar-collapsed .sidebar-item-text,
+        .sidebar-collapsed .list-header h3,
+        .sidebar-collapsed .search-box input {
+            display: none;
+        }
+
+        .sidebar-collapsed .sidebar-item {
+            justify-content: center;
+        }
+
+        .sidebar-collapsed .sidebar-item i {
+            margin-right: 0;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-collapsed .toggle-sidebar i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-box {
+            position: relative;
+            padding: 0.8rem 1rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--sidebar-text);
+            opacity: 0.7;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--sidebar-text);
+            transition: var(--transition);
+        }
+
+        .search-box input::placeholder {
+            color: var(--sidebar-text);
+            opacity: 0.7;
+        }
+
+        .search-box input:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem 0;
+        }
+
+        .sidebar-item {
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin: 0.2rem 0;
+        }
+
+        .sidebar-item i {
+            margin-right: 1rem;
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-item.active {
+            background-color: var(--primary-color);
+        }
+
+        .sidebar-footer {
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        /* Notes List */
+        .notes-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .list-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .list-header h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--sidebar-text);
+            cursor: pointer;
+            font-size: 1rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #notes-container {
+            flex: 1;
+            overflow-y: auto;
+            list-style: none;
+        }
+
+        .note-item {
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 0.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .note-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .note-item.active {
+            background-color: var(--primary-color);
+        }
+
+        .note-item-content {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .note-item-title {
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-item-preview {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-item-date {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 0.3rem;
+        }
+
+        .note-item-actions {
+            display: flex;
+            gap: 0.3rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .note-item:hover .note-item-actions {
+            opacity: 1;
+        }
+
+        .note-item.active .note-item-actions {
+            color: white;
+        }
+
+        /* Editor */
+        .note-editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: var(--editor-bg);
+        }
+
+        .toolbar {
+            background-color: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            padding-right: 0.5rem;
+            margin-right: 0.5rem;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .tool-group:last-child {
+            border-right: none;
+            margin-right: 0;
+        }
+
+        .tool-btn {
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .tool-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .tool-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .tool-select {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.2rem 0.5rem;
+            color: var(--dark-color);
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
+        .editor-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background-color: var(--card-bg);
+            margin: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px var(--shadow-color);
+        }
+
+        #note-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            outline: none;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            color: var(--dark-color);
+        }
+
+        #note-content {
+            min-height: calc(100% - 3rem);
+            outline: none;
+            line-height: 1.8;
+            color: var(--dark-color);
+        }
+
+        #note-content:empty:before {
+            content: attr(placeholder);
+            color: var(--gray-color);
+        }
+
+        #note-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        /* Footer */
+        .app-footer {
+            background-color: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 1.5rem;
+            color: var(--gray-color);
+            font-size: 0.8rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .footer-btn {
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+            font-size: 1rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .footer-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d11a4a;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .form-text {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+            margin-top: 0.3rem;
+        }
+
+        /* Settings */
+        .settings-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .option-label {
+            flex: 1;
+        }
+
+        .option-title {
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .option-description {
+            font-size: 0.8rem;
+            color: var(--gray-color);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+            margin-left: 1rem;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1100;
+            animation: slideIn 0.3s ease, fadeOut 0.5s ease 3s forwards;
+            max-width: 350px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .notification i {
+            font-size: 1.2rem;
+        }
+
+        .notification-success {
+            background-color: var(--success-color);
+        }
+
+        .notification-error {
+            background-color: var(--danger-color);
+        }
+
+        .notification-warning {
+            background-color: var(--warning-color);
+        }
+
+        .notification-info {
+            background-color: var(--accent-color);
+        }
+
+        /* Profile */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            position: relative;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            overflow: hidden;
+            border: 3px solid var(--primary-color);
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar-edit {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 0.3rem;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .profile-avatar:hover .profile-avatar-edit {
+            opacity: 1;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-email {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray-color);
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 20;
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+                transform: translateX(-100%);
+                transition: var(--transition);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .sidebar-collapsed {
+                width: 280px;
+            }
+
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 15;
+                display: none;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .app-header {
+                padding: 0.8rem 1rem;
+            }
+
+            .logo h1 {
+                font-size: 1.2rem;
+            }
+
+            .editor-container {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+
+            #note-title {
+                font-size: 1.5rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .tool-group {
+                border-right: none;
+                margin-right: 0;
+                padding-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <h1>Apuntes Digitales</h1>
+            </div>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="user-avatar">
+                    <span id="avatar-text">US</span>
+                    <img id="avatar-img" style="display: none;">
+                </div>
+                <div class="dropdown-menu" id="user-dropdown">
+                    <div class="dropdown-item" id="view-profile">
+                        <i class="fas fa-user"></i>
+                        <span>Mi perfil</span>
+                    </div>
+                    <div class="dropdown-item" id="settings-btn">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar sesión</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h3>Menú</h3>
+                    <button class="toggle-sidebar" id="toggle-sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+                
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar apuntes...">
+                </div>
+                
+                <div class="sidebar-nav">
+                    <div class="sidebar-item active">
+                        <i class="fas fa-book"></i>
+                        <span class="sidebar-item-text">Mis Apuntes</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-star"></i>
+                        <span class="sidebar-item-text">Destacados</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-folder"></i>
+                        <span class="sidebar-item-text">Categorías</span>
+                    </div>
+                    <div class="sidebar-item">
+                        <i class="fas fa-trash"></i>
+                        <span class="sidebar-item-text">Papelera</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-footer">
+                    <button class="icon-btn" id="create-note-btn" title="Nuevo apunte">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Sidebar Overlay (Mobile) -->
+            <div class="sidebar-overlay" id="sidebar-overlay"></div>
+            
+            <!-- Notes List -->
+            <div class="notes-section">
+                <div class="list-header">
+                    <h3>Mis Apuntes</h3>
+                    <div class="list-actions">
+                        <button class="icon-btn" title="Ordenar">
+                            <i class="fas fa-sort"></i>
+                        </button>
+                        <button class="icon-btn" title="Vista">
+                            <i class="fas fa-th"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <ul id="notes-container">
+                    <!-- Notas se cargarán aquí dinámicamente -->
+                </ul>
+            </div>
+            
+            <!-- Editor -->
+            <section class="note-editor">
+                <div class="toolbar">
+                    <div class="tool-group">
+                        <button class="tool-btn" data-command="bold" title="Negrita">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button class="tool-btn" data-command="italic" title="Cursiva">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button class="tool-btn" data-command="underline" title="Subrayado">
+                            <i class="fas fa-underline"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <button class="tool-btn" data-command="insertUnorderedList" title="Viñetas">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button class="tool-btn" data-command="insertOrderedList" title="Numeración">
+                            <i class="fas fa-list-ol"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <button class="tool-btn" data-command="justifyLeft" title="Alinear izquierda">
+                            <i class="fas fa-align-left"></i>
+                        </button>
+                        <button class="tool-btn" data-command="justifyCenter" title="Centrar">
+                            <i class="fas fa-align-center"></i>
+                        </button>
+                        <button class="tool-btn" data-command="justifyRight" title="Alinear derecha">
+                            <i class="fas fa-align-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <select class="tool-select" id="heading-select">
+                            <option value="p">Párrafo</option>
+                            <option value="h1">Título 1</option>
+                            <option value="h2">Título 2</option>
+                            <option value="h3">Título 3</option>
+                        </select>
+                    </div>
+                    
+                    <div class="tool-group">
+                        <button class="tool-btn" data-command="insertImage" title="Insertar imagen">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        <button class="tool-btn" id="record-audio" title="Dictado por voz">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <button class="tool-btn" id="text-to-speech" title="Leer texto">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button class="tool-btn" id="import-pdf" title="Importar PDF">
+                            <i class="fas fa-file-pdf"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="editor-container">
+                    <div id="note-title" contenteditable="true" placeholder="Título del apunte"></div>
+                    <div id="note-content" contenteditable="true" placeholder="Comienza a escribir aquí..."></div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="status-bar">
+                <span id="char-count">0 caracteres</span>
+                <span id="word-count">0 palabras</span>
+                <span id="last-saved">No guardado</span>
+            </div>
+            <div class="nav-buttons">
+                <button id="save-note" class="footer-btn" title="Guardar">
+                    <i class="fas fa-save"></i>
+                </button>
+                <button id="export-note" class="footer-btn" title="Exportar">
+                    <i class="fas fa-file-export"></i>
+                </button>
+                <button id="toggle-theme" class="footer-btn" title="Cambiar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </footer>
+        
+        <!-- Modal para importar PDF -->
+        <div id="pdf-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Importar PDF</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="pdf-input" class="form-label">Seleccionar archivo PDF</label>
+                        <input type="file" id="pdf-input" class="form-control" accept=".pdf">
+                        <p class="form-text">El PDF será convertido a texto y agregado como un nuevo apunte.</p>
+                    </div>
+                    <div id="pdf-preview" style="display: none; margin-top: 1rem;">
+                        <h4>Vista previa:</h4>
+                        <div id="pdf-preview-content" style="max-height: 200px; overflow-y: auto; padding: 0.5rem; background-color: var(--editor-bg); border-radius: 5px;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary close-modal">Cancelar</button>
+                    <button id="convert-pdf" class="btn btn-primary">Convertir a Apunte</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal para insertar imagen -->
+        <div id="image-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Insertar Imagen</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="image-input" class="form-label">Seleccionar imagen</label>
+                        <input type="file" id="image-input" class="form-control" accept="image/*">
+                        <p class="form-text">Formatos soportados: JPG, PNG, GIF, SVG.</p>
+                    </div>
+                    <div id="image-preview" style="margin-top: 1rem; text-align: center; display: none;">
+                        <img id="preview-img" style="max-width: 100%; max-height: 200px; border-radius: 5px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary close-modal">Cancelar</button>
+                    <button id="insert-image-btn" class="btn btn-primary">Insertar Imagen</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de configuración -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Configuración</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="tabs">
+                        <div class="tab active" data-tab="general">General</div>
+                        <div class="tab" data-tab="account">Cuenta</div>
+                        <div class="tab" data-tab="about">Acerca de</div>
+                    </div>
+                    
+                    <div class="tab-content active" id="general-tab">
+                        <div class="settings-section">
+                            <div class="settings-title">
+                                <i class="fas fa-paint-brush"></i>
+                                <span>Apariencia</span>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-label">
+                                    <div class="option-title">Modo oscuro</div>
+                                    <div class="option-description">Cambia entre tema claro y oscuro</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="dark-mode-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-label">
+                                    <div class="option-title">Tamaño de fuente</div>
+                                    <div class="option-description">Ajusta el tamaño del texto en el editor</div>
+                                </div>
+                                <select id="font-size-select" class="form-control" style="width: auto; display: inline-block;">
+                                    <option value="small">Pequeño</option>
+                                    <option value="medium" selected>Mediano</option>
+                                    <option value="large">Grande</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <div class="settings-title">
+                                <i class="fas fa-edit"></i>
+                                <span>Editor</span>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-label">
+                                    <div class="option-title">Auto-guardado</div>
+                                    <div class="option-description">Guarda automáticamente los cambios cada 30 segundos</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="autosave-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="settings-option">
+                                <div class="option-label">
+                                    <div class="option-title">Mostrar contadores</div>
+                                    <div class="option-description">Muestra el conteo de palabras y caracteres</div>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="counters-toggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="account-tab">
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="profile-avatar">
+                                <span id="profile-avatar-text">US</span>
+                                <img id="profile-avatar-img" style="display: none;">
+                                <div class="profile-avatar-edit">Cambiar foto</div>
+                            </div>
+                            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                            <h3 class="profile-name" id="profile-name">Usuario Sin Nombre</h3>
+                            <p class="profile-email" id="profile-email">usuario@ejemplo.com</p>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <div class="form-group">
+                                <label for="profile-name-input" class="form-label">Nombre</label>
+                                <input type="text" id="profile-name-input" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-email-input" class="form-label">Correo electrónico</label>
+                                <input type="email" id="profile-email-input" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-password-input" class="form-label">Nueva contraseña</label>
+                                <input type="password" id="profile-password-input" class="form-control" placeholder="Dejar en blanco para no cambiar">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-password-confirm" class="form-label">Confirmar contraseña</label>
+                                <input type="password" id="profile-password-confirm" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-content" id="about-tab">
+                        <div class="settings-section">
+                            <div class="settings-title">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Acerca de Apuntes Digitales</span>
+                            </div>
+                            <p style="margin-bottom: 1rem;">Versión: 1.0.0</p>
+                            <p style="margin-bottom: 1rem;">Apuntes Digitales es una aplicación avanzada para tomar notas con múltiples funcionalidades como reconocimiento de voz, importación de PDF y más.</p>
+                            <div class="settings-title" style="margin-top: 1.5rem;">
+                                <i class="fas fa-code"></i>
+                                <span>Desarrollador</span>
+                            </div>
+                            <p style="margin-bottom: 0.5rem;"><strong>Nombre:</strong> [Tu Nombre]</p>
+                            <p style="margin-bottom: 0.5rem;"><strong>Contacto:</strong> tu@email.com</p>
+                            <p style="margin-bottom: 1rem;"><strong>Sitio web:</strong> <a href="#" style="color: var(--primary-color);">www.tusitio.com</a></p>
+                            <div class="settings-title" style="margin-top: 1.5rem;">
+                                <i class="fas fa-heart"></i>
+                                <span>Créditos</span>
+                            </div>
+                            <p style="margin-bottom: 0.5rem;">Iconos: Font Awesome</p>
+                            <p style="margin-bottom: 0.5rem;">PDF.js para procesamiento de PDF</p>
+                            <p>Web Speech API para reconocimiento de voz</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary close-modal">Cerrar</button>
+                    <button id="save-settings" class="btn btn-primary">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de perfil -->
+        <div id="profile-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Mi Perfil</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <span id="profile-view-avatar-text">US</span>
+                            <img id="profile-view-avatar-img" style="display: none;">
+                        </div>
+                        <h3 class="profile-name" id="profile-view-name">Usuario Sin Nombre</h3>
+                        <p class="profile-email" id="profile-view-email">usuario@ejemplo.com</p>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-title">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Estadísticas</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                            <div style="background-color: var(--editor-bg); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="notes-count">0</div>
+                                <div style="font-size: 0.9rem; color: var(--gray-color);">Apuntes</div>
+                            </div>
+                            <div style="background-color: var(--editor-bg); padding: 1rem; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color);" id="words-count">0</div>
+                                <div style="font-size: 0.9rem; color: var(--gray-color);">Palabras</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary close-modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de inicio de sesión -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Iniciar sesión</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="login-email" class="form-label">Correo electrónico</label>
+                        <input type="email" id="login-email" class="form-control" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password" class="form-label">Contraseña</label>
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-group" style="text-align: right;">
+                        <a href="#" style="color: var(--primary-color); font-size: 0.9rem;">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+                <div class="modal-footer" style="justify-content: space-between;">
+                    <button id="show-register" class="btn btn-secondary">Crear cuenta</button>
+                    <button id="login-btn" class="btn btn-primary">Iniciar sesión</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de registro -->
+        <div id="register-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Crear cuenta</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="register-name" class="form-label">Nombre completo</label>
+                        <input type="text" id="register-name" class="form-control" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email" class="form-label">Correo electrónico</label>
+                        <input type="email" id="register-email" class="form-control" placeholder="tu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password" class="form-label">Contraseña</label>
+                        <input type="password" id="register-password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password-confirm" class="form-label">Confirmar contraseña</label>
+                        <input type="password" id="register-password-confirm" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check" style="display: flex; align-items: center;">
+                            <input type="checkbox" id="register-terms" style="margin-right: 0.5rem;">
+                            <label for="register-terms" style="font-size: 0.9rem;">Acepto los <a href="#" style="color: var(--primary-color);">términos y condiciones</a></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="justify-content: space-between;">
+                    <button id="show-login" class="btn btn-secondary">Ya tengo cuenta</button>
+                    <button id="register-btn" class="btn btn-primary">Registrarse</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Configuración de PDF.js
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+            
+            // Variables de estado
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            let currentNoteId = null;
+            let speechRecognition = null;
+            let speechSynthesis = window.speechSynthesis;
+            let user = JSON.parse(localStorage.getItem('user')) || {
+                name: 'Usuario Sin Nombre',
+                email: 'usuario@ejemplo.com',
+                avatar: null,
+                stats: {
+                    notesCount: 0,
+                    wordsCount: 0
+                }
+            };
+            
+            // Configuración
+            let settings = JSON.parse(localStorage.getItem('settings')) || {
+                darkMode: false,
+                fontSize: 'medium',
+                autosave: true,
+                showCounters: true,
+                sidebarCollapsed: false
+            };
+            
+            // Inicializar la aplicación
+            initApp();
+            
+            function initApp() {
+                // Aplicar configuración
+                applySettings();
+                
+                // Verificar si hay usuario
+                if (!user.email || user.email === 'usuario@ejemplo.com') {
+                    $('#login-modal').css('display', 'flex');
+                } else {
+                    updateUserUI();
+                }
+                
+                // Renderizar notas
+                renderNotesList();
+                
+                // Cargar la primera nota si existe
+                if (notes.length > 0) {
+                    loadNote(notes[0].id);
+                } else {
+                    createNewNote();
+                }
+                
+                // Configurar event listeners
+                setupEventListeners();
+                
+                // Actualizar estadísticas
+                updateStats();
+            }
+            
+            function setupEventListeners() {
+                // Botón nueva nota
+                $('#new-note, #create-note-btn').click(createNewNote);
+                
+                // Guardar nota
+                $('#save-note').click(saveCurrentNote);
+                
+                // Botones de formato
+                $('.tool-btn').click(function() {
+                    const command = $(this).data('command');
+                    if (command === 'insertImage') {
+                        $('#image-modal').css('display', 'flex');
+                    } else {
+                        document.execCommand(command, false, null);
+                        $('#note-content').focus();
+                    }
+                });
+                
+                // Selección de encabezados
+                $('#heading-select').change(function() {
+                    const format = $(this).val();
+                    document.execCommand('formatBlock', false, format);
+                    $('#note-content').focus();
+                });
+                
+                // Dictado por voz
+                $('#record-audio').click(toggleSpeechRecognition);
+                
+                // Texto a voz
+                $('#text-to-speech').click(readSelectedText);
+                
+                // Importar PDF
+                $('#import-pdf').click(function() {
+                    $('#pdf-modal').css('display', 'flex');
+                });
+                
+                // Cerrar modales
+                $('.close-modal').click(function() {
+                    $(this).closest('.modal').css('display', 'none');
+                });
+                
+                // Insertar imagen
+                $('#insert-image-btn').click(insertImageFromFile);
+                
+                // Vista previa de imagen
+                $('#image-input').change(function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            $('#preview-img').attr('src', e.target.result);
+                            $('#image-preview').show();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                // Convertir PDF
+                $('#convert-pdf').click(convertPdfToNote);
+                
+                // Vista previa de PDF
+                $('#pdf-input').change(function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const typedarray = new Uint8Array(e.target.result);
+                            
+                            pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                                return pdf.getPage(1).then(function(page) {
+                                    return page.getTextContent().then(function(textContent) {
+                                        let pageText = '';
+                                        textContent.items.forEach(function(textItem) {
+                                            pageText += textItem.str + ' ';
+                                        });
+                                        
+                                        $('#pdf-preview-content').text(pageText.substring(0, 500) + '...');
+                                        $('#pdf-preview').show();
+                                    });
+                                });
+                            }).catch(function(error) {
+                                console.error('Error al previsualizar PDF:', error);
+                                showNotification('Error al previsualizar el PDF', 'error');
+                            });
+                        };
+                        reader.readAsArrayBuffer(file);
+                    }
+                });
+                
+                // Contador de caracteres y palabras
+                $('#note-title, #note-content').on('input', updateCounters);
+                
+                // Auto-guardado
+                if (settings.autosave) {
+                    setInterval(saveCurrentNote, 30000);
+                }
+                
+                // Cambiar tema
+                $('#toggle-theme').click(toggleDarkMode);
+                
+                // Configuración
+                $('#settings-btn').click(function() {
+                    loadSettings();
+                    $('#settings-modal').css('display', 'flex');
+                });
+                
+                // Guardar configuración
+                $('#save-settings').click(saveSettings);
+                
+                // Ver perfil
+                $('#view-profile').click(function() {
+                    loadProfile();
+                    $('#profile-modal').css('display', 'flex');
+                });
+                
+                // Menú de usuario
+                $('#user-avatar').click(function(e) {
+                    e.stopPropagation();
+                    $('#user-dropdown').toggleClass('show');
+                });
+                
+                // Cerrar menú de usuario al hacer clic fuera
+                $(document).click(function() {
+                    $('#user-dropdown').removeClass('show');
+                });
+                
+                // Cerrar sesión
+                $('#logout-btn').click(function() {
+                    $('#login-modal').css('display', 'flex');
+                });
+                
+                // Cambiar foto de perfil
+                $('#profile-avatar').click(function() {
+                    $('#avatar-upload').click();
+                });
+                
+                $('#avatar-upload').change(function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            user.avatar = e.target.result;
+                            updateUserUI();
+                            localStorage.setItem('user', JSON.stringify(user));
+                            showNotification('Foto de perfil actualizada', 'success');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                // Tabs de configuración
+                $('.tab').click(function() {
+                    const tabId = $(this).data('tab');
+                    $('.tab').removeClass('active');
+                    $(this).addClass('active');
+                    
+                    $('.tab-content').removeClass('active');
+                    $(`#${tabId}-tab`).addClass('active');
+                });
+                
+                // Iniciar sesión
+                $('#login-btn').click(loginUser);
+                
+                // Mostrar registro
+                $('#show-register').click(function() {
+                    $('#login-modal').css('display', 'none');
+                    $('#register-modal').css('display', 'flex');
+                });
+                
+                // Mostrar inicio de sesión
+                $('#show-login').click(function() {
+                    $('#register-modal').css('display', 'none');
+                    $('#login-modal').css('display', 'flex');
+                });
+                
+                // Registrarse
+                $('#register-btn').click(registerUser);
+                
+                // Toggle sidebar
+                $('#toggle-sidebar').click(function() {
+                    settings.sidebarCollapsed = !settings.sidebarCollapsed;
+                    $('#sidebar').toggleClass('sidebar-collapsed');
+                    localStorage.setItem('settings', JSON.stringify(settings));
+                });
+                
+                // Sidebar mobile
+                $('.sidebar-item').click(function() {
+                    if ($(window).width() < 992) {
+                        $('#sidebar').removeClass('show');
+                        $('#sidebar-overlay').removeClass('show');
+                    }
+                });
+                
+                // Mostrar sidebar en mobile
+                $('.logo').click(function() {
+                    if ($(window).width() < 992) {
+                        $('#sidebar').addClass('show');
+                        $('#sidebar-overlay').addClass('show');
+                    }
+                });
+                
+                // Ocultar sidebar al hacer clic en overlay
+                $('#sidebar-overlay').click(function() {
+                    $('#sidebar').removeClass('show');
+                    $(this).removeClass('show');
+                });
+            }
+            
+            function renderNotesList() {
+                const $notesContainer = $('#notes-container');
+                $notesContainer.empty();
+                
+                if (notes.length === 0) {
+                    $notesContainer.append('<li style="padding: 1rem; text-align: center; color: var(--gray-color);">No hay apuntes</li>');
+                    return;
+                }
+                
+                notes.forEach(note => {
+                    const date = new Date(note.updatedAt);
+                    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    const $noteItem = $(`
+                        <li class="note-item" data-id="${note.id}">
+                            <div class="note-item-content">
+                                <div class="note-item-title">${note.title || 'Sin título'}</div>
+                                <div class="note-item-preview">${note.content.replace(/<[^>]*>/g, '').substring(0, 50)}</div>
+                                <div class="note-item-date">${formattedDate}</div>
+                            </div>
+                            <div class="note-item-actions">
+                                <button class="icon-btn" title="Favorito">
+                                    <i class="far fa-star"></i>
+                                </button>
+                                <button class="icon-btn delete-note" title="Eliminar">
+                                    <i class="far fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </li>
+                    `);
+                    
+                    $noteItem.click(function() {
+                        loadNote(note.id);
+                    });
+                    
+                    $noteItem.find('.delete-note').click(function(e) {
+                        e.stopPropagation();
+                        deleteNote(note.id);
+                    });
+                    
+                    $notesContainer.append($noteItem);
+                });
+                
+                // Resaltar nota actual
+                if (currentNoteId) {
+                    $(`.note-item[data-id="${currentNoteId}"]`).addClass('active');
+                }
+            }
+            
+            function createNewNote() {
+                const newNote = {
+                    id: Date.now().toString(),
+                    title: '',
+                    content: '',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    favorite: false
+                };
+                
+                notes.unshift(newNote);
+                currentNoteId = newNote.id;
+                
+                saveNotesToStorage();
+                renderNotesList();
+                
+                $('#note-title').html('');
+                $('#note-content').html('');
+                $('#note-title').focus();
+                
+                updateCounters();
+                updateStats();
+            }
+            
+            function loadNote(noteId) {
+                const note = notes.find(n => n.id === noteId);
+                if (!note) return;
+                
+                currentNoteId = noteId;
+                
+                $('#note-title').html(note.title);
+                $('#note-content').html(note.content);
+                
+                renderNotesList();
+                updateCounters();
+            }
+            
+            function saveCurrentNote() {
+                if (!currentNoteId) return;
+                
+                const noteIndex = notes.findIndex(n => n.id === currentNoteId);
+                if (noteIndex === -1) return;
+                
+                notes[noteIndex].title = $('#note-title').html();
+                notes[noteIndex].content = $('#note-content').html();
+                notes[noteIndex].updatedAt = new Date().toISOString();
+                
+                saveNotesToStorage();
+                renderNotesList();
+                updateStats();
+                
+                $('#last-saved').text(`Guardado: ${new Date().toLocaleTimeString()}`);
+                showNotification('Apunte guardado', 'success');
+            }
+            
+            function deleteNote(noteId) {
+                if (confirm('¿Estás seguro de que quieres eliminar este apunte?')) {
+                    notes = notes.filter(n => n.id !== noteId);
+                    
+                    if (currentNoteId === noteId) {
+                        if (notes.length > 0) {
+                            loadNote(notes[0].id);
+                        } else {
+                            createNewNote();
+                        }
+                    }
+                    
+                    saveNotesToStorage();
+                    renderNotesList();
+                    updateStats();
+                    
+                    showNotification('Apunte eliminado', 'success');
+                }
+            }
+            
+            function saveNotesToStorage() {
+                localStorage.setItem('notes', JSON.stringify(notes));
+            }
+            
+            function toggleSpeechRecognition() {
+                if (!('webkitSpeechRecognition' in window)) {
+                    showNotification('El reconocimiento de voz no está disponible en tu navegador', 'error');
+                    return;
+                }
+                
+                const $micBtn = $('#record-audio');
+                
+                if (speechRecognition && speechRecognition.isRecording) {
+                    // Detener grabación
+                    speechRecognition.stop();
+                    $micBtn.removeClass('active');
+                    showNotification('Dictado detenido', 'info');
+                } else {
+                    // Iniciar grabación
+                    speechRecognition = new webkitSpeechRecognition();
+                    speechRecognition.continuous = true;
+                    speechRecognition.interimResults = true;
+                    speechRecognition.lang = 'es-ES';
+                    
+                    speechRecognition.onresult = function(event) {
+                        let interimTranscript = '';
+                        let finalTranscript = '';
+                        
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            const transcript = event.results[i][0].transcript;
+                            if (event.results[i].isFinal) {
+                                finalTranscript += transcript;
+                            } else {
+                                interimTranscript += transcript;
+                            }
+                        }
+                        
+                        if (finalTranscript) {
+                            document.execCommand('insertText', false, finalTranscript);
+                        }
+                    };
+                    
+                    speechRecognition.onerror = function(event) {
+                        console.error('Error en reconocimiento de voz:', event.error);
+                        $micBtn.removeClass('active');
+                        showNotification('Error en reconocimiento de voz: ' + event.error, 'error');
+                    };
+                    
+                    speechRecognition.onend = function() {
+                        $micBtn.removeClass('active');
+                    };
+                    
+                    speechRecognition.isRecording = true;
+                    speechRecognition.start();
+                    $micBtn.addClass('active');
+                    showNotification('Dictado por voz activado. Habla ahora...', 'info');
+                }
+            }
+            
+            function readSelectedText() {
+                if (!speechSynthesis) {
+                    showNotification('La síntesis de voz no está disponible en tu navegador', 'error');
+                    return;
+                }
+                
+                // Detener cualquier lectura en curso
+                speechSynthesis.cancel();
+                
+                let textToRead = '';
+                const selection = window.getSelection();
+                
+                if (selection && selection.toString().length > 0) {
+                    // Leer texto seleccionado
+                    textToRead = selection.toString();
+                } else {
+                    // Leer todo el contenido si no hay selección
+                    textToRead = $('#note-content').text();
+                    
+                    if (!textToRead.trim()) {
+                        showNotification('No hay texto para leer', 'warning');
+                        return;
+                    }
+                }
+                
+                const utterance = new SpeechSynthesisUtterance(textToRead);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                
+                utterance.onstart = function() {
+                    $('#text-to-speech').addClass('active');
+                    showNotification('Leyendo texto...', 'info');
+                };
+                
+                utterance.onend = function() {
+                    $('#text-to-speech').removeClass('active');
+                };
+                
+                speechSynthesis.speak(utterance);
+            }
+            
+            function insertImageFromFile() {
+                const fileInput = document.getElementById('image-input');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    showNotification('Por favor selecciona una imagen', 'warning');
+                    return;
+                }
+                
+                if (!file.type.match('image.*')) {
+                    showNotification('El archivo seleccionado no es una imagen', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.maxWidth = '100%';
+                    img.style.height = 'auto';
+                    img.style.borderRadius = '8px';
+                    img.style.margin = '0.5rem 0';
+                    
+                    document.execCommand('insertHTML', false, img.outerHTML);
+                    $('#image-modal').css('display', 'none');
+                    fileInput.value = '';
+                    $('#image-preview').hide();
+                    
+                    saveCurrentNote();
+                    showNotification('Imagen insertada', 'success');
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            function convertPdfToNote() {
+                const fileInput = document.getElementById('pdf-input');
+                const file = fileInput.files[0];
+                
+                if (!file) {
+                    showNotification('Por favor selecciona un archivo PDF', 'warning');
+                    return;
+                }
+                
+                if (file.type !== 'application/pdf') {
+                    showNotification('El archivo seleccionado no es un PDF', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const typedarray = new Uint8Array(e.target.result);
+                    
+                    showNotification('Procesando PDF...', 'info');
+                    
+                    // Cargar el documento PDF
+                    pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+                        let pdfText = '';
+                        
+                        // Función recursiva para extraer texto de todas las páginas
+                        function extractPageText(pageNum) {
+                            return pdf.getPage(pageNum).then(function(page) {
+                                return page.getTextContent().then(function(textContent) {
+                                    let pageText = '';
+                                    
+                                    textContent.items.forEach(function(textItem) {
+                                        pageText += textItem.str + ' ';
+                                    });
+                                    
+                                    pdfText += pageText + '\n\n';
+                                    
+                                    if (pageNum < pdf.numPages) {
+                                        return extractPageText(pageNum + 1);
+                                    } else {
+                                        return pdfText;
+                                    }
+                                });
+                            });
+                        }
+                        
+                        // Comenzar extracción desde la primera página
+                        extractPageText(1).then(function(fullText) {
+                            // Crear una nueva nota con el texto del PDF
+                            createNewNote();
+                            
+                            // Establecer el título como el nombre del archivo (sin extensión)
+                            const fileName = file.name.replace('.pdf', '');
+                            $('#note-title').text(fileName);
+                            
+                            // Insertar el texto del PDF en el contenido
+                            $('#note-content').text(fullText);
+                            
+                            // Guardar la nota
+                            saveCurrentNote();
+                            
+                            // Cerrar el modal
+                            $('#pdf-modal').css('display', 'none');
+                            fileInput.value = '';
+                            $('#pdf-preview').hide();
+                            
+                            showNotification('PDF convertido a apunte', 'success');
+                        });
+                    }).catch(function(error) {
+                        console.error('Error al procesar PDF:', error);
+                        showNotification('Error al procesar el PDF. Asegúrate de que el archivo no esté protegido.', 'error');
+                    });
+                };
+                
+                reader.readAsArrayBuffer(file);
+            }
+            
+            function updateCounters() {
+                if (!settings.showCounters) {
+                    $('#char-count, #word-count').hide();
+                    return;
+                }
+                
+                $('#char-count, #word-count').show();
+                
+                const titleText = $('#note-title').text();
+                const contentText = $('#note-content').text();
+                
+                const totalText = titleText + ' ' + contentText;
+                const charCount = totalText.length;
+                const wordCount = totalText.trim() === '' ? 0 : totalText.trim().split(/\s+/).length;
+                
+                $('#char-count').text(`${charCount} caracteres`);
+                $('#word-count').text(`${wordCount} palabras`);
+            }
+            
+            function showNotification(message, type) {
+                const $notification = $(`
+                    <div class="notification notification-${type}">
+                        <i class="fas fa-${getNotificationIcon(type)}"></i>
+                        <span>${message}</span>
+                    </div>
+                `);
+                
+                $('body').append($notification);
+                
+                // Eliminar notificación después de 3 segundos
+                setTimeout(function() {
+                    $notification.remove();
+                }, 3000);
+            }
+            
+            function getNotificationIcon(type) {
+                switch (type) {
+                    case 'success': return 'check-circle';
+                    case 'error': return 'times-circle';
+                    case 'warning': return 'exclamation-circle';
+                    case 'info': return 'info-circle';
+                    default: return 'info-circle';
+                }
+            }
+            
+            function toggleDarkMode() {
+                settings.darkMode = !settings.darkMode;
+                applySettings();
+                localStorage.setItem('settings', JSON.stringify(settings));
+                
+                if (settings.darkMode) {
+                    showNotification('Modo oscuro activado', 'success');
+                } else {
+                    showNotification('Modo claro activado', 'success');
+                }
+            }
+            
+            function applySettings() {
+                if (settings.darkMode) {
+                    $('body').attr('data-theme', 'dark');
+                    $('#toggle-theme i').removeClass('fa-moon').addClass('fa-sun');
+                } else {
+                    $('body').removeAttr('data-theme');
+                    $('#toggle-theme i').removeClass('fa-sun').addClass('fa-moon');
+                }
+                
+                // Tamaño de fuente
+                $('#note-content').css('font-size', getFontSize(settings.fontSize));
+                
+                // Auto-guardado
+                if (settings.autosave) {
+                    $('#autosave-toggle').prop('checked', true);
+                } else {
+                    $('#autosave-toggle').prop('checked', false);
+                }
+                
+                // Contadores
+                if (settings.showCounters) {
+                    $('#counters-toggle').prop('checked', true);
+                    $('#char-count, #word-count').show();
+                } else {
+                    $('#counters-toggle').prop('checked', false);
+                    $('#char-count, #word-count').hide();
+                }
+                
+                // Sidebar
+                if (settings.sidebarCollapsed) {
+                    $('#sidebar').addClass('sidebar-collapsed');
+                } else {
+                    $('#sidebar').removeClass('sidebar-collapsed');
+                }
+            }
+            
+            function getFontSize(size) {
+                switch (size) {
+                    case 'small': return '14px';
+                    case 'medium': return '16px';
+                    case 'large': return '18px';
+                    default: return '16px';
+                }
+            }
+            
+            function loadSettings() {
+                $('#dark-mode-toggle').prop('checked', settings.darkMode);
+                $('#font-size-select').val(settings.fontSize);
+                $('#autosave-toggle').prop('checked', settings.autosave);
+                $('#counters-toggle').prop('checked', settings.showCounters);
+            }
+            
+            function saveSettings() {
+                settings.darkMode = $('#dark-mode-toggle').is(':checked');
+                settings.fontSize = $('#font-size-select').val();
+                settings.autosave = $('#autosave-toggle').is(':checked');
+                settings.showCounters = $('#counters-toggle').is(':checked');
+                
+                localStorage.setItem('settings', JSON.stringify(settings));
+                applySettings();
+                
+                $('#settings-modal').css('display', 'none');
+                showNotification('Configuración guardada', 'success');
+            }
+            
+            function loadProfile() {
+                $('#profile-name-input').val(user.name);
+                $('#profile-email-input').val(user.email);
+                $('#profile-password-input').val('');
+                $('#profile-password-confirm').val('');
+                
+                // Vista de perfil
+                $('#profile-view-name').text(user.name);
+                $('#profile-view-email').text(user.email);
+                
+                if (user.avatar) {
+                    $('#profile-view-avatar-img').attr('src', user.avatar).show();
+                    $('#profile-view-avatar-text').hide();
+                } else {
+                    $('#profile-view-avatar-text').text(getInitials(user.name)).show();
+                    $('#profile-view-avatar-img').hide();
+                }
+                
+                // Estadísticas
+                updateStats();
+            }
+            
+            function updateUserUI() {
+                $('#profile-name').text(user.name);
+                $('#profile-email').text(user.email);
+                
+                if (user.avatar) {
+                    $('#avatar-img').attr('src', user.avatar).show();
+                    $('#avatar-text').hide();
+                    $('#profile-avatar-img').attr('src', user.avatar).show();
+                    $('#profile-avatar-text').hide();
+                } else {
+                    $('#avatar-text').text(getInitials(user.name)).show();
+                    $('#avatar-img').hide();
+                    $('#profile-avatar-text').text(getInitials(user.name)).show();
+                    $('#profile-avatar-img').hide();
+                }
+            }
+            
+            function getInitials(name) {
+                return name.split(' ').map(part => part[0]).join('').substring(0, 2).toUpperCase();
+            }
+            
+            function updateStats() {
+                let totalWords = 0;
+                notes.forEach(note => {
+                    const text = note.title + ' ' + note.content.replace(/<[^>]*>/g, '');
+                    totalWords += text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+                });
+                
+                user.stats.notesCount = notes.length;
+                user.stats.wordsCount = totalWords;
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                $('#notes-count').text(notes.length);
+                $('#words-count').text(totalWords);
+            }
+            
+            function loginUser() {
+                const email = $('#login-email').val().trim();
+                const password = $('#login-password').val().trim();
+                
+                if (!email || !password) {
+                    showNotification('Por favor completa todos los campos', 'warning');
+                    return;
+                }
+                
+                // Simulación de login (en una app real sería una llamada a backend)
+                user.email = email;
+                user.name = email.split('@')[0];
+                user.avatar = null;
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                $('#login-modal').css('display', 'none');
+                updateUserUI();
+                showNotification('Sesión iniciada correctamente', 'success');
+            }
+            
+            function registerUser() {
+                const name = $('#register-name').val().trim();
+                const email = $('#register-email').val().trim();
+                const password = $('#register-password').val();
+                const confirmPassword = $('#register-password-confirm').val();
+                const acceptTerms = $('#register-terms').is(':checked');
+                
+                if (!name || !email || !password || !confirmPassword) {
+                    showNotification('Por favor completa todos los campos', 'warning');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showNotification('Las contraseñas no coinciden', 'error');
+                    return;
+                }
+                
+                if (!acceptTerms) {
+                    showNotification('Debes aceptar los términos y condiciones', 'warning');
+                    return;
+                }
+                
+                // Simulación de registro (en una app real sería una llamada a backend)
+                user.name = name;
+                user.email = email;
+                user.avatar = null;
+                localStorage.setItem('user', JSON.stringify(user));
+                
+                $('#register-modal').css('display', 'none');
+                updateUserUI();
+                showNotification('Cuenta creada correctamente', 'success');
+            }
+            
+            // Cerrar modales al hacer clic fuera
+            $(window).click(function(event) {
+                if ($(event.target).hasClass('modal')) {
+                    $(event.target).css('display', 'none');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
